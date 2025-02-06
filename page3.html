@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ลงทะเบียนการใช้งาน</title>
+    <style>
+        /* สไตล์รูปภาพซ้ายบน */
+        .logo {
+            position: absolute;
+            top: 0;
+            left: 0;
+            margin: 10px;
+        }
+        /* สไตล์ของ body */
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #faf8f8;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        .button-back-top-right {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+
+        .container {
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+        }
+
+        h1,
+        h2 {
+            font-size: 24px;
+            color: #7c5ba6;
+            margin-bottom: 20px;
+        }
+
+        form {
+            text-align: left;
+            margin: 0 auto;
+            max-width: 300px;
+        }
+
+        label {
+            display: block;
+            margin: 10px 0 5px;
+            font-weight: bold;
+            color: #7c5ba6;
+        }
+
+        /* สไตล์ของกล่องกรอกข้อมูล */
+        input[type="text"],
+        input[type="tel"],
+        input[type="date"] {
+            width: 100%;
+            padding: 14px;
+            margin: 10px 0;
+            border: 2px solid #7c5ba6;
+            border-radius: 8px;
+            font-size: 16px;
+            box-sizing: border-box;
+            background-color: #f9f9f9;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        input[type="text"]:focus,
+        input[type="tel"]:focus,
+        input[type="date"]:focus {
+            border-color: #f5b62a;
+            box-shadow: 0 0 5px rgba(245, 130, 32, 0.7);
+            outline: none;
+        }
+
+        button {
+            background-color: #f5b62a;
+            /* สีม่วง */
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            width: 100%;
+        }
+
+        button:focus {
+            background-color: #f5b62a;
+            /* สีส้มเมื่อ focus */
+        }
+
+        button:hover {
+            background-color: #f07325;
+        }
+
+        .confirmation-screen {
+            display: none;
+            /* Hide confirmation screen by default */
+        }
+
+        .confirmation {
+            text-align: left;
+            margin-top: 20px;
+        }
+
+        .confirmation p {
+            margin: 10px 0;
+        }
+
+        .button-back {
+            background-color: #f5b62a;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            margin-top: 20px;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+
+        .button-back:hover {
+            background-color: #f07325;
+        }
+
+        .button-next {
+            background-color: #f5b62a;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            margin-top: 20px;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+
+        .button-next:hover {
+            background-color: #f07325;
+        }
+        
+    </style>
+</head>
+
+<body>
+    <!-- รูปภาพซ้ายบน -->
+    <div class="logo">
+        <img src="03.png" alt="ป้าย" style="width: 150px; height: 70px;">
+    </div>
+    <a href="index1.html" class="button-back-top-right">
+        <img src="2.png" alt="ย้อนกลับ" style="width: 50px; height: 40px;"></a>
+        
+    <div class="container" id="registration-screen">
+        <h1>เข้าสู่ระบบ</h1>
+        <form id="register-form">
+            <label for="name">ชื่อ</label>
+            <input type="text" id="name" placeholder="ใส่ชื่อ" required>
+
+            <label for="name">นามสกุล</label>
+            <input type="text" id="name" placeholder="ใส่นามสกุล" required>
+
+            <label for="phone">เบอร์โทรศัพท์</label>
+            <input type="tel" id="phone" placeholder="ใส่เบอร์โทรศัพท์" required>
+
+            <button type="submit">ยืนยันการเข้าสู่ระบบ</button>
+        </form>
+    </div>
+
+    <div class="container confirmation-screen" id="confirmation-screen">
+        <h2>คำแนะนำการใช้งาน</h2>
+    <div class="confirmation">
+        <ul>
+            <li><strong>1. เตรียมตัว</strong></li>
+            - ใช้ถุงใต้ตาเป็นจุดสังเกต<br>
+            - ควรใช้แสงสว่างเพียงพอ<br>
+            - ทำความสะอาดรอบดวงตา<br>
+            - ตรวจสอบให้ไม่มีสิ่งใดบังถุงใต้ตา</p>
+            <li><strong>2. เมื่อเข้าสู่หน้าถ่ายรูป</strong></li>
+            - ดึงเปลือกตาลงในด้านที่ท่านถนัด หรือทั้งสองด้าน<br>
+            - รอให้ระบบทำการตรวจจับดวงตา<br>
+            - เมื่อตรวจจับดวงตาได้เเล้ว กล้องจะเปลี่ยนเป็นสีเขียว <br>
+            - กดถ่ายภาพเมื่อระบบตวจจับดวงตาได้เเล้ว</p>
+        </ul>
+    </div>
+        <button class="button-next" onclick="startShooting()">เริ่มการถ่ายภาพ</button>
+    </div>
+
+    <script>
+        document.getElementById('register-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+            document.getElementById('registration-screen').style.display = 'none';
+            document.getElementById('confirmation-screen').style.display = 'block';
+        });
+
+        function startShooting() {
+            window.location.href = 'page4.html'; // Redirect to the shooting page
+        }
+    </script>
+</body>
+
+</html>

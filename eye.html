@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eye Blink Counter with Image Capture</title>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils"></script>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        table,
+        th,
+        td {
+            border: 1px solid black;
+        }
+
+        th,
+        td {
+            padding: 8px;
+            text-align: center;
+        }
+
+        img {
+            max-width: 100px;
+            max-height: 100px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Eye Blink Counter with Image Capture</h1>
+    <video id="inputVideo" autoplay muted></video>
+    <canvas id="outputCanvas"></canvas>
+    <p>Blinks: <span id="blinkCount">0</span></p>
+    <h2>Captured Images</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Time</th>
+                <th>Left Eye</th>
+                <th>Right Eye</th>
+            </tr>
+        </thead>
+        <tbody id="imageTableBody"></tbody>
+    </table>
+    <script>
+        const videoElement = document.getElementById('inputVideo');
+        const canvasElement = document.getElementById('outputCanvas');
+        const canvasCtx = canvasElement.getContext('2d');
+        const blinkCountElement = document.getElementById('blinkCount');
+        const tableBody = document.getElementById('imageTableBody');
+        let blinkCount = 0;
+
+        const faceMesh = new FaceMesh({
+            locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`,
+        });
+
+        faceMesh.setOptions({
+            maxNumFaces: 1,
+            refineLandmarks: true,
+            minDetectionConfidence: 0.5,
+            minTrackingConfidence: 0.5,
+        });
+
+        const camera = new Camera(videoElement, {
+            onFrame: async () => {
+                await faceMesh.send({ image: videoElement });
+            },
+            width: 640,
+            height: 480,
+        });
+        camera.start();
+
+        let earThreshold = 0.25;
+        let isBlinking = false;
+
+        function calculateEAR(landmarks) {
+            const leftEAR = (distance(landmarks[159], landmarks[145]) +
+                distance(landmarks[158], landmarks[144])) /
+                (2 * distance(landmarks[33], landmarks[133]));
+            const rightEAR = (distance(landmarks[386], landmarks[374]) +
+                distance(landmarks[385], landmarks[373])) /
+                (2 * distance(landmarks[362], landmarks[263]));
+            return (leftEAR + rightEAR) / 2.0;
+        }
+
+        function distance(point1, point2) {
+            return Math.sqrt(
+                (point1.x - point2.x) ** 2 + (point1.y - point2.y) ** 2
+            );
+        }
+
+        function captureSquare(landmarks, indices, scaleFactor) {
+            const xCoords = indices.map((idx) => landmarks[idx].x * canvasElement.width);
+            const yCoords = indices.map((idx) => landmarks[idx].y * canvasElement.height);
+
+            const xMin = Math.min(...xCoords);
+            const xMax = Math.max(...xCoords);
+            const yMin = Math.min(...yCoords);
+            const yMax = Math.max(...yCoords);
+
+            const width = xMax - xMin;
+            const height = yMax - yMin;
+            const size = Math.max(width, height) * scaleFactor;
+
+            const centerX = (xMin + xMax) / 2;
+            const centerY = (yMin + yMax) / 2;
+
+            const squareXMin = centerX - size / 2;
+            const squareYMin = centerY - size / 2;
+
+            return { x: squareXMin, y: squareYMin, size: size };
+        }
+
+        function saveImage(x, y, size, eyeName) {
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = size;
+            tempCanvas.height = size;
+            const tempCtx = tempCanvas.getContext('2d');
+            tempCtx.drawImage(canvasElement, x, y, size, size, 0, 0, size, size);
+
+            const imageDataURL = tempCanvas.toDataURL('image/png');
+            return imageDataURL;
+        }
+
+        function updateTable(leftImage, rightImage) {
+            const row = document.createElement('tr');
+            const timeCell = document.createElement('td');
+            const leftEyeCell = document.createElement('td');
+            const rightEyeCell = document.createElement('td');
+
+            const currentTime = new Date().toLocaleTimeString();
+            timeCell.textContent = currentTime;
+
+            const leftEyeImg = document.createElement('img');
+            leftEyeImg.src = leftImage;
+            leftEyeCell.appendChild(leftEyeImg);
+
+            const rightEyeImg = document.createElement('img');
+            rightEyeImg.src = rightImage;
+            rightEyeCell.appendChild(rightEyeImg);
+
+            row.appendChild(timeCell);
+            row.appendChild(leftEyeCell);
+            row.appendChild(rightEyeCell);
+
+            // Insert the new row at the top of the table body
+            tableBody.insertBefore(row, tableBody.firstChild);
+        }
+
+
+        function captureAndSaveImages(landmarks) {
+            const leftEyeSquare = captureSquare(landmarks, [33, 133, 159, 145, 158, 144], 1.5);
+            const rightEyeSquare = captureSquare(landmarks, [362, 263, 386, 374, 385, 373], 1.5);
+
+            const leftImage = saveImage(leftEyeSquare.x, leftEyeSquare.y, leftEyeSquare.size, 'Left Eye');
+            const rightImage = saveImage(rightEyeSquare.x, rightEyeSquare.y, rightEyeSquare.size, 'Right Eye');
+            
+            //const lresult = predict(leftImage)
+            //const rresult = predict(rightImage)
+
+            updateTable(leftImage, rightImage);
+        }
+
+        faceMesh.onResults((results) => {
+            canvasElement.width = videoElement.videoWidth;
+            canvasElement.height = videoElement.videoHeight;
+            canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+            canvasCtx.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
+
+            if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
+                const landmarks = results.multiFaceLandmarks[0];
+                const ear = calculateEAR(landmarks);
+
+                if (ear < earThreshold && !isBlinking) {
+                    isBlinking = true;
+                } else if (ear >= earThreshold && isBlinking) {
+                    isBlinking = false;
+                    blinkCount++;
+                    blinkCountElement.textContent = blinkCount;
+                }
+
+                // Capture and save images every minute
+                const currentTime = Date.now();
+                if (!window.lastCaptureTime || currentTime - window.lastCaptureTime > 2000) {
+                    window.lastCaptureTime = currentTime;
+                    captureAndSaveImages(landmarks);
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>
